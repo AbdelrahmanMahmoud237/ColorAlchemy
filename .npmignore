@@ -1,0 +1,15 @@
+# Exclude testing files
+test/
+vitest.config.js
+
+# Exclude documentation source files
+ColorUtilityInternalLogic.tex
+
+# Exclude examples
+examples/
+
+# Exclude known system/IDE files
+.git/
+.gitignore
+.DS_Store
+node_modules/

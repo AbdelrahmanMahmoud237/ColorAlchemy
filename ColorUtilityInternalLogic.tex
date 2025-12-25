@@ -1,0 +1,67 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\geometry{a4paper, margin=1in}
+
+\title{ColorAlchemy: Internal Logic Explained}
+\author{ColorAlchemy Documentation}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+The ColorAlchemy library acts as a \textbf{universal translator} for colors. It abstracts away the complexities of different color formats (Hex, HSL, RGB, CMYK) by standardizing them into a single internal representation. This document explains the core mechanisms that drive the library.
+
+\section{1. The "Universal Language" (RGB Source of Truth)}
+Regardless of the input format---whether it is a Hex code like \texttt{\#ff0000}, an HSL string like \texttt{hsl(0, 100\%, 50\%)}, or a raw object---the \texttt{Color} class immediately converts the input into a unified \textbf{RGB} (Red, Green, Blue) format.
+
+\begin{itemize}
+    \item \textbf{Input:} \texttt{hsl(0, 100\%, 50\%)} (Red in HSL)
+    \item \textbf{Internal Storage:} \texttt{\{ r: 255, g: 0, b: 0, a: 1 \}}
+\end{itemize}
+
+The library does not store the original format. It only maintains these three values (plus an alpha channel). This ensures consistency across all operations.
+
+\section{2. Translating Out (Conversion)}
+When a user requests a format like CMYK or Hex, the library does not retrieve a stored value. Instead, it calculates the output on-the-fly using mathematical formulas based on the stored RGB values.
+
+\begin{itemize}
+    \item \textbf{Request:} \texttt{.toCmyk()}
+    \item \textbf{Logic:} The library takes $R=255, G=0, B=0$ and applies standard color theory transformation formulas.
+    \item \textbf{Result:} \texttt{\{ c: 0, m: 100, y: 100, k: 0 \}}
+\end{itemize}
+
+\section{3. Manipulation (The HSL Trick)}
+Directly manipulating RGB values (e.g., adding 10 to Red) often yields unpredictable visual results. To solve this, the utility uses \textbf{HSL} (Hue, Saturation, Lightness) as an intermediate step for meaningful manipulations.
+
+When a user calls \texttt{.lighten(10)}:
+\begin{enumerate}
+    \item The library temporarily converts the stored RGB values to HSL.
+    \item It targets the \textbf{L} (Lightness) component and increases it by 10.
+    \item It converts the modified HSL values back into standard RGB.
+    \item It saves the new RGB values as the current state.
+\end{enumerate}
+
+This ensures that "lightening" a color actually makes it perceived as brighter, rather than just mathematically larger in value.
+
+\section{4. Accessibility (The "Mathematical Eye")}
+To determine if text is readable on a background, the library simulates the human eye's perception of brightness, known as \textbf{Relative Luminance}.
+
+The human eye is more sensitive to Green than Red or Blue. The library uses the WCAG (Web Content Accessibility Guidelines) formula to calculate a "brightness score" between 0.0 (Black) and 1.0 (White):
+
+\[ L = 0.2126 \times R + 0.7152 \times G + 0.0722 \times B \]
+\textit{(Note: RGB values are linearized before this calculation)}
+
+By comparing the Luminance ($L_1$) of the foreground against the Luminance ($L_2$) of the background, the library calculates a Contrast Ratio:
+
+\[ \text{Ratio} = \frac{L_{lighter} + 0.05}{L_{darker} + 0.05} \]
+
+If this ratio meets the thresholds (e.g., 4.5:1 for AA standard), the \texttt{isAccessible()} method returns \texttt{true}.
+
+\end{document}

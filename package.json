@@ -1,0 +1,24 @@
+{
+  "name": "color-alchemy",
+  "version": "1.0.0",
+  "description": "A comprehensive color manipulation utility library.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "lint": "eslint src/**/*.js"
+  },
+  "keywords": [
+    "color",
+    "utility",
+    "conversion",
+    "accessibility",
+    "manipulation",
+    "alchemy"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  }
+}
